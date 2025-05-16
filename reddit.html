@@ -1,29 +1,97 @@
-<html>
-  <head>
-    <!-- Reddit Pixel -->
-<script>
-!function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/pixel.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);
-  function initializeRdt() {
-      var id = document.getElementById('idInput').value;
-      rdt('init', id, {"optOut":false,"useDecimalCurrencyValues":true});
-      document.getElementById('currentId').innerText = "Current ID: " + id;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reddit Pixel Event Tester</title>
+  <script>
+    // Load Reddit Pixel script
+    (function(w,d){
+      if(!w.rdt){
+        var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};
+        p.callQueue=[];
+        var t=d.createElement("script");
+        t.src="https://www.redditstatic.com/ads/pixel.js";
+        t.async=!0;
+        var s=d.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(t,s);
+      }
+    })(window,document);
+  </script>
+</head>
+<body>
+  <h1>Reddit Pixel Event Tester</h1>
+  <label for="pixelId">Pixel ID:</label>
+  <input type="text" id="pixelId" placeholder="Enter your Pixel ID" /><br/><br/>
 
-  function trackPageVisit() {
-      rdt('track', 'PageVisit');
-  }
-</script>
-<!-- DO NOT MODIFY UNLESS TO REPLACE A USER IDENTIFIER -->
-<!-- End Reddit Pixel -->
+  <label for="eventType">Event Type:</label>
+  <select id="eventType">
+    <option value="PageVisit">PageVisit</option>
+    <option value="ViewContent">ViewContent</option>
+    <option value="Search">Search</option>
+    <option value="AddToCart">AddToCart</option>
+    <option value="AddToWishlist">AddToWishlist</option>
+    <option value="Purchase">Purchase</option>
+    <option value="Lead">Lead</option>
+    <option value="SignUp">SignUp</option>
+    <option value="Custom">Custom</option>
+  </select><br/><br/>
 
-  </head>
-  <body>Reddit
-    <label for="idInput">Enter ID:</label>
-    <input type="text" id="idInput">
-    <button onclick="initializeRdt()">Initialize RDT</button><br><br>
+  <div id="customEventNameContainer" style="display:none;">
+    <label for="customEventName">Custom Event Name:</label>
+    <input type="text" id="customEventName" placeholder="Enter custom event name" /><br/><br/>
+  </div>
 
-    <button onclick="trackPageVisit()">Track Page Visit</button><br><br>
+  <label for="metadata">Event Metadata (JSON):</label><br/>
+  <textarea id="metadata" rows="5" cols="50" placeholder='{"currency": "USD", "value": 100}'></textarea><br/><br/>
 
-    <div id="currentId"></div>
-  </body>
+  <button onclick="sendEvent()">Send Event</button>
+
+  <script>
+    document.getElementById('eventType').addEventListener('change', function() {
+      var customEventNameContainer = document.getElementById('customEventNameContainer');
+      if (this.value === 'Custom') {
+        customEventNameContainer.style.display = 'block';
+      } else {
+        customEventNameContainer.style.display = 'none';
+      }
+    });
+
+    function sendEvent() {
+      var pixelId = document.getElementById('pixelId').value.trim();
+      var eventType = document.getElementById('eventType').value;
+      var customEventName = document.getElementById('customEventName').value.trim();
+      var metadataInput = document.getElementById('metadata').value.trim();
+      var metadata = {};
+
+      if (!pixelId) {
+        alert('Please enter a Pixel ID.');
+        return;
+      }
+
+      try {
+        metadata = metadataInput ? JSON.parse(metadataInput) : {};
+      } catch (e) {
+        alert('Invalid JSON in metadata.');
+        return;
+      }
+
+      // Initialize Reddit Pixel
+      rdt('init', pixelId, {"optOut":false,"useDecimalCurrencyValues":true});
+
+      if (eventType === 'Custom') {
+        if (!customEventName) {
+          alert('Please enter a custom event name.');
+          return;
+        }
+        metadata.customEventName = customEventName;
+        rdt('track', 'Custom', metadata);
+      } else {
+        rdt('track', eventType, metadata);
+      }
+
+      alert('Event sent: ' + (eventType === 'Custom' ? customEventName : eventType));
+    }
+  </script>
+</body>
 </html>
+
