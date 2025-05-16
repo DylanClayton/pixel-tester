@@ -71,39 +71,31 @@
     });
 
     function addProduct() {
-      var container = document.getElementById('productsContainer');
-      var productIndex = container.children.length;
-      var productDiv = document.createElement('div');
-      productDiv.id = 'product_' + productIndex;
-      productDiv.innerHTML = `
-        <fieldset>
-          <legend>Product ${productIndex + 1}</legend>
-          <label>Product ID:</label>
-          <input type="text" name="productId" placeholder="e.g., SKU123" /><br/><br/>
-          <label>Product Name:</label>
-          <input type="text" name="productName" placeholder="e.g., Example Product" /><br/><br/>
-          <label>Category:</label>
-          <input type="text" name="category" placeholder="e.g., Electronics" /><br/><br/>
-          <label>Brand:</label>
-          <input type="text" name="brand" placeholder="e.g., BrandName" /><br/><br/>
-          <label>Variant:</label>
-          <input type="text" name="variant" placeholder="e.g., Red" /><br/><br/>
-          <label>Price:</label>
-          <input type="number" name="price" placeholder="e.g., 99.99" /><br/><br/>
-          <label>Quantity:</label>
-          <input type="number" name="quantity" placeholder="e.g., 1" /><br/><br/>
-          <button type="button" onclick="removeProduct(${productIndex})">Remove Product</button>
-        </fieldset><br/>
-      `;
-      container.appendChild(productDiv);
-    }
+  const container = document.getElementById('productsContainer');
+  const productIndex = container.children.length;
+  const productDiv = document.createElement('div');
+  productDiv.id = 'product_' + productIndex;
+  productDiv.innerHTML = `
+    <fieldset>
+      <legend>Product ${productIndex + 1}</legend>
+      <label>Product ID:</label>
+      <input type="text" name="id" placeholder="e.g., SKU123" /><br/><br/>
+      <label>Product Name:</label>
+      <input type="text" name="name" placeholder="e.g., Example Product" /><br/><br/>
+      <label>Category:</label>
+      <input type="text" name="category" placeholder="e.g., Electronics" /><br/><br/>
+      <button type="button" onclick="removeProduct(${productIndex})">Remove Product</button>
+    </fieldset><br/>
+  `;
+  container.appendChild(productDiv);
+}
 
-    function removeProduct(index) {
-      var productDiv = document.getElementById('product_' + index);
-      if (productDiv) {
-        productDiv.remove();
-      }
-    }
+function removeProduct(index) {
+  const productDiv = document.getElementById('product_' + index);
+  if (productDiv) {
+    productDiv.remove();
+  }
+}
 
     function sendEvent() {
       var pixelId = document.getElementById('pixelId').value.trim();
