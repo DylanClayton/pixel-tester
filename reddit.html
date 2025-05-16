@@ -41,8 +41,22 @@
     <input type="text" id="customEventName" placeholder="Enter custom event name" /><br/><br/>
   </div>
 
-  <label for="metadata">Event Metadata (JSON):</label><br/>
-  <textarea id="metadata" rows="5" cols="50" placeholder='{"currency": "USD", "value": 100}'></textarea><br/><br/>
+  <h3>Standard Metadata</h3>
+  <label for="currency">Currency:</label>
+  <input type="text" id="currency" placeholder="e.g., USD" /><br/><br/>
+
+  <label for="value">Value:</label>
+  <input type="number" id="value" placeholder="e.g., 100" /><br/><br/>
+
+  <label for="transactionId">Transaction ID:</label>
+  <input type="text" id="transactionId" placeholder="e.g., 12345678" /><br/><br/>
+
+  <label for="itemCount">Item Count:</label>
+  <input type="number" id="itemCount" placeholder="e.g., 1" /><br/><br/>
+
+  <h3>Products Metadata</h3>
+  <div id="productsContainer"></div>
+  <button onclick="addProduct()">Add Product</button><br/><br/>
 
   <button onclick="sendEvent()">Send Event</button>
 
@@ -56,23 +70,85 @@
       }
     });
 
+    function addProduct() {
+      var container = document.getElementById('productsContainer');
+      var productIndex = container.children.length;
+      var productDiv = document.createElement('div');
+      productDiv.id = 'product_' + productIndex;
+      productDiv.innerHTML = `
+        <fieldset>
+          <legend>Product ${productIndex + 1}</legend>
+          <label>Product ID:</label>
+          <input type="text" name="productId" placeholder="e.g., SKU123" /><br/><br/>
+          <label>Product Name:</label>
+          <input type="text" name="productName" placeholder="e.g., Example Product" /><br/><br/>
+          <label>Category:</label>
+          <input type="text" name="category" placeholder="e.g., Electronics" /><br/><br/>
+          <label>Brand:</label>
+          <input type="text" name="brand" placeholder="e.g., BrandName" /><br/><br/>
+          <label>Variant:</label>
+          <input type="text" name="variant" placeholder="e.g., Red" /><br/><br/>
+          <label>Price:</label>
+          <input type="number" name="price" placeholder="e.g., 99.99" /><br/><br/>
+          <label>Quantity:</label>
+          <input type="number" name="quantity" placeholder="e.g., 1" /><br/><br/>
+          <button type="button" onclick="removeProduct(${productIndex})">Remove Product</button>
+        </fieldset><br/>
+      `;
+      container.appendChild(productDiv);
+    }
+
+    function removeProduct(index) {
+      var productDiv = document.getElementById('product_' + index);
+      if (productDiv) {
+        productDiv.remove();
+      }
+    }
+
     function sendEvent() {
       var pixelId = document.getElementById('pixelId').value.trim();
       var eventType = document.getElementById('eventType').value;
       var customEventName = document.getElementById('customEventName').value.trim();
-      var metadataInput = document.getElementById('metadata').value.trim();
-      var metadata = {};
+      var currency = document.getElementById('currency').value.trim();
+      var value = parseFloat(document.getElementById('value').value);
+      var transactionId = document.getElementById('transactionId').value.trim();
+      var itemCount = parseInt(document.getElementById('itemCount').value);
 
       if (!pixelId) {
         alert('Please enter a Pixel ID.');
         return;
       }
 
-      try {
-        metadata = metadataInput ? JSON.parse(metadataInput) : {};
-      } catch (e) {
-        alert('Invalid JSON in metadata.');
-        return;
+      var metadata = {};
+      if (currency) metadata.currency = currency;
+      if (!isNaN(value)) metadata.value = value;
+      if (transactionId) metadata.transactionId = transactionId;
+      if (!isNaN(itemCount)) metadata.itemCount = itemCount;
+
+      // Gather products metadata
+      var products = [];
+      var container = document.getElementById('productsContainer');
+      for (var i = 0; i < container.children.length; i++) {
+        var productDiv = container.children[i];
+        var product = {};
+        var inputs = productDiv.querySelectorAll('input');
+        inputs.forEach(function(input) {
+          var name = input.name;
+          var value = input.value.trim();
+          if (value) {
+            if (name === 'price' || name === 'quantity') {
+              product[name] = parseFloat(value);
+            } else {
+              product[name] = value;
+            }
+          }
+        });
+        if (Object.keys(product).length > 0) {
+          products.push(product);
+        }
+      }
+      if (products.length > 0) {
+        metadata.products = products;
       }
 
       // Initialize Reddit Pixel
