@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <meta property="og:title" content="Facebook T-Shirt">
   <meta property="og:description" content="Unisex Facebook T-shirt, Small">
   <meta property="og:url" content="https://example.org/facebook">
@@ -14,56 +13,61 @@
   <meta property="product:price:currency" content="USD">
   <meta property="product:retailer_item_id" content="facebook_tshirt_001">
   <meta property="product:item_group_id" content="fb_tshirts">
-  
   <title>Meta Pixel Event Tester</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f7f7f8;
+      background-color: #f0f2f5;
       color: #1c1e21;
       margin: 0;
       padding: 20px;
     }
+
     h1 {
       color: #1877f2;
     }
-    label, select, input, button {
-      margin-bottom: 10px;
-      width: 100%;
-      padding: 8px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    button {
+
+    .button {
       background-color: #1877f2;
-      color: white;
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 15px;
       cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
     }
-    button:hover {
+
+    .button:hover {
       background-color: #165eab;
     }
-    fieldset {
-      border: 1px solid #ccc;
+
+    .input-field {
+      border: 1px solid #1877f2;
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .product-fieldset {
+      border: 1px solid #1877f2;
       padding: 10px;
-      margin-bottom: 20px;
-    }
-    legend {
-      font-weight: bold;
-    }
-    .product-group {
       margin-bottom: 15px;
+    }
+
+    .product-legend {
+      color: #1877f2;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-
   <h1>Meta Pixel Event Tester</h1>
-
   <label for="pixelId">Pixel ID:</label>
-  <input type="text" id="pixelId" placeholder="Enter your Meta Pixel ID">
+  <input type="text" id="pixelId" class="input-field" placeholder="Enter your Pixel ID" /><br/>
 
   <label for="eventType">Event Type:</label>
-  <select id="eventType" onchange="toggleCustomEventFields()">
+  <select id="eventType" class="input-field">
+    <option value="PageView">PageView</option>
     <option value="ViewContent">ViewContent</option>
     <option value="Search">Search</option>
     <option value="AddToCart">AddToCart</option>
@@ -81,110 +85,162 @@
     <option value="StartTrial">StartTrial</option>
     <option value="SubmitApplication">SubmitApplication</option>
     <option value="Subscribe">Subscribe</option>
-    <option value="Custom">Custom Event</option>
-  </select>
+    <option value="Custom">Custom</option>
+  </select><br/>
 
-  <div id="customEventNameDiv" style="display:none;">
+  <div id="customEventNameContainer" style="display:none;">
     <label for="customEventName">Custom Event Name:</label>
-    <input type="text" id="customEventName" placeholder="Enter custom event name">
+    <input type="text" id="customEventName" class="input-field" placeholder="Enter custom event name" /><br/>
   </div>
 
-  <div id="eventParameters"></div>
+  <h3>Standard Metadata</h3>
+  <label for="currency">Currency:</label>
+  <input type="text" id="currency" class="input-field" placeholder="e.g., USD" /><br/>
 
-  <button onclick="sendEvent()">Send Event</button>
+  <label for="value">Value:</label>
+  <input type="number" id="value" class="input-field" placeholder="e.g., 100" /><br/>
+
+  <label for="transactionId">Transaction ID:</label>
+  <input type="text" id="transactionId" class="input-field" placeholder="e.g., 12345678" /><br/>
+
+  <label for="contentType">Content Type:</label>
+  <input type="text" id="contentType" class="input-field" placeholder="e.g., product" /><br/>
+
+  <label for="contentIds">Content IDs (comma-separated):</label>
+  <input type="text" id="contentIds" class="input-field" placeholder="e.g., 123,456" /><br/>
+
+  <label for="searchString">Search String:</label>
+  <input type="text" id="searchString" class="input-field" placeholder="e.g., shoes" /><br/>
+
+  <h3>Products Metadata</h3>
+  <div id="productsContainer"></div>
+  <button class="button" onclick="addProduct()">Add Product</button><br/><br/>
+
+  <button class="button" onclick="initializePixel()">Initialize Pixel</button>
+  <button class="button" onclick="sendEvent()">Send Event</button>
 
   <script>
-    const eventParametersMap = {
-      'ViewContent': ['content_ids', 'content_type', 'value', 'currency'],
-      'Search': ['search_string', 'content_type', 'value', 'currency'],
-      'AddToCart': ['content_ids', 'content_type', 'value', 'currency', 'quantity'],
-      'AddToWishlist': ['content_ids', 'content_type', 'value', 'currency'],
-      'InitiateCheckout': ['content_ids', 'content_type', 'value', 'currency'],
-      'AddPaymentInfo': ['content_ids', 'content_type', 'value', 'currency'],
-      'Purchase': ['content_ids', 'content_type', 'value', 'currency', 'transaction_id'],
-      'Lead': ['content_ids', 'content_type', 'value', 'currency'],
-      'CompleteRegistration': ['content_ids', 'content_type', 'value', 'currency'],
-      'Contact': ['content_ids', 'content_type', 'value', 'currency'],
-      'CustomizeProduct': ['content_ids', 'content_type', 'value', 'currency'],
-      'Donate': ['content_ids', 'content_type', 'value', 'currency'],
-      'FindLocation': ['content_ids', 'content_type', 'value', 'currency'],
-      'Schedule': ['content_ids', 'content_type', 'value', 'currency'],
-      'StartTrial': ['content_ids', 'content_type', 'value', 'currency'],
-      'SubmitApplication': ['content_ids', 'content_type', 'value', 'currency'],
-      'Subscribe': ['content_ids', 'content_type', 'value', 'currency'],
-      'Custom': ['custom_param1', 'custom_param2']
-    };
+    // Load Meta Pixel script
+    (function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)})(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
 
-    function toggleCustomEventFields() {
-      const eventType = document.getElementById('eventType').value;
-      const customEventNameDiv = document.getElementById('customEventNameDiv');
-      if (eventType === 'Custom') {
-        customEventNameDiv.style.display = 'block';
+    document.getElementById('eventType').addEventListener('change', function() {
+      var customEventNameContainer = document.getElementById('customEventNameContainer');
+      if (this.value === 'Custom') {
+        customEventNameContainer.style.display = 'block';
       } else {
-        customEventNameDiv.style.display = 'none';
+        customEventNameContainer.style.display = 'none';
       }
-      updateEventParameters();
+    });
+
+    function addProduct() {
+      const container = document.getElementById('productsContainer');
+      const productIndex = container.children.length;
+      const productDiv = document.createElement('div');
+      productDiv.id = 'product_' + productIndex;
+      productDiv.innerHTML = `
+        <fieldset class="product-fieldset">
+          <legend class="product-legend">Product ${productIndex + 1}</legend>
+          <label>Product ID:</label>
+          <input type="text" name="id" class="input-field" placeholder="e.g., SKU123" /><br/>
+          <label>Product Name:</label>
+          <input type="text" name="name" class="input-field" placeholder="e.g., Example Product" /><br/>
+          <label>Category:</label>
+          <input type="text" name="category" class="input-field" placeholder="e.g., Electronics" /><br/>
+          <label>Price:</label>
+          <input type="number" name="price" class="input-field" placeholder="e.g., 99.99" /><br/>
+          <label>Quantity:</label>
+          <input type="number" name="quantity" class="input-field" placeholder="e.g., 1" /><br/>
+          <button type="button" class="button" onclick="removeProduct(${productIndex})">Remove Product</button>
+        </fieldset><br/>
+      `;
+      container.appendChild(productDiv);
     }
 
-    function updateEventParameters() {
-      const eventType = document.getElementById('eventType').value;
-      const parameters = eventParametersMap[eventType] || [];
-      const eventParametersDiv = document.getElementById('eventParameters');
-      eventParametersDiv.innerHTML = '';
-      parameters.forEach(param => {
-        const div = document.createElement('div');
-        div.classList.add('product-group');
-        div.innerHTML = `
-          <label for="${param}">${param.replace(/_/g, ' ').toUpperCase()}:</label>
-          <input type="text" id="${param}" placeholder="Enter ${param.replace(/_/g, ' ')}">
-        `;
-        eventParametersDiv.appendChild(div);
-      });
+    function removeProduct(index) {
+      const productDiv = document.getElementById('product_' + index);
+      if (productDiv) {
+        productDiv.remove();
+      }
+    }
+
+    function initializePixel() {
+      const pixelId = document.getElementById('pixelId').value.trim();
+      if (!pixelId) {
+        alert('Please enter your Pixel ID.');
+        return;
+      }
+      fbq('init', pixelId);
+      alert('Meta Pixel initialized with ID: ' + pixelId);
     }
 
     function sendEvent() {
-      const pixelId = document.getElementById('pixelId').value.trim();
-      if (!pixelId) {
-        alert('Please enter your Meta Pixel ID.');
+      const eventType = document.getElementById('eventType').value;
+      const customEventName = document.getElementById('customEventName').value.trim();
+      const currency = document.getElementById('currency').value.trim();
+      const value = parseFloat(document.getElementById('value').value);
+      const transactionId = document.getElementById('transactionId').value.trim();
+      const contentType = document.getElementById('contentType').value.trim();
+      const contentIds = document.getElementById('contentIds').value.trim();
+      const searchString = document.getElementById('searchString').value.trim();
+
+      if (!window.fbq) {
+        alert('Meta Pixel is not initialized. Please initialize it first.');
         return;
       }
 
-      const eventType = document.getElementById('eventType').value;
       let eventName = eventType;
       if (eventType === 'Custom') {
-        eventName = document.getElementById('customEventName').value.trim();
-        if (!eventName) {
+        if (!customEventName) {
           alert('Please enter a custom event name.');
           return;
         }
+        eventName = customEventName;
       }
 
-      const params = {};
-      const parameterFields = eventParametersMap[eventType] || [];
-      parameterFields.forEach(param => {
-        const value = document.getElementById(param).value.trim();
-        if (value) {
-          params[param] = value;
+      const metadata = {};
+      if (currency) metadata.currency = currency;
+      if (!isNaN(value)) metadata.value = value;
+      if (transactionId) metadata.transaction_id = transactionId;
+      if (contentType) metadata.content_type = contentType;
+      if (contentIds) metadata.content_ids = contentIds.split(',').map(id => id.trim());
+      if (searchString) metadata.search_string = searchString;
+
+      // Gather products metadata
+      const products = [];
+      const container = document.getElementById('productsContainer');
+      for (let i = 0; i < container.children.length; i++) {
+        const productDiv = container.children[i];
+        const product = {};
+        const inputs = productDiv.querySelectorAll('input');
+        inputs.forEach(function(input) {
+          const name = input.name;
+          const value = input.value.trim();
+          if (value) {
+            if (name === 'price' || name === 'quantity') {
+              product[name] = parseFloat(value);
+            } else {
+              product[name] = value;
+            }
+          }
+        });
+        if (Object.keys(product).length > 0) {
+          products.push(product);
         }
-      });
-
-      if (Object.keys(params).length === 0) {
-        alert('Please fill in at least one parameter.');
-        return;
+      }
+      if (products.length > 0) {
+        metadata.contents = products;
       }
 
-      if (!window.fbq) {
-        alert('Meta Pixel is not loaded.');
-        return;
-      }
-
-      fbq('track', eventName, params);
-      alert(`Event "${eventName}" sent with parameters: ${JSON.stringify(params)}`);
+      fbq('track', eventName, metadata);
+      alert('Event sent: ' + eventName);
     }
-
-    // Initialize the event parameters for the default event
-    updateEventParameters();
   </script>
-
 </body>
 </html>
