@@ -17,6 +17,51 @@
       }
     })(window,document);
   </script>
+  <style>
+    body {
+      font-family: 'VAG Rounded', sans-serif;
+      background-color: #FFFFFF;
+      color: #000000;
+      margin: 0;
+      padding: 20px;
+    }
+  
+    h1 {
+      color: #FF4500;
+    }
+  
+    .button {
+      background-color: #FF4500;
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  
+    .button:hover {
+      background-color: #e03d00;
+    }
+  
+    .input-field {
+      border: 1px solid #FF4500;
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+  
+    .product-fieldset {
+      border: 1px solid #FF4500;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+  
+    .product-legend {
+      color: #FF4500;
+      font-weight: bold;
+    }
+  </style>
+
 </head>
 <body>
   <h1>Reddit Pixel Event Tester</h1>
@@ -71,31 +116,31 @@
     });
 
     function addProduct() {
-  const container = document.getElementById('productsContainer');
-  const productIndex = container.children.length;
-  const productDiv = document.createElement('div');
-  productDiv.id = 'product_' + productIndex;
-  productDiv.innerHTML = `
-    <fieldset>
-      <legend>Product ${productIndex + 1}</legend>
-      <label>Product ID:</label>
-      <input type="text" name="id" placeholder="e.g., SKU123" /><br/><br/>
-      <label>Product Name:</label>
-      <input type="text" name="name" placeholder="e.g., Example Product" /><br/><br/>
-      <label>Category:</label>
-      <input type="text" name="category" placeholder="e.g., Electronics" /><br/><br/>
-      <button type="button" onclick="removeProduct(${productIndex})">Remove Product</button>
-    </fieldset><br/>
-  `;
-  container.appendChild(productDiv);
-}
-
-function removeProduct(index) {
-  const productDiv = document.getElementById('product_' + index);
-  if (productDiv) {
-    productDiv.remove();
-  }
-}
+      const container = document.getElementById('productsContainer');
+      const productIndex = container.children.length;
+      const productDiv = document.createElement('div');
+      productDiv.id = 'product_' + productIndex;
+      productDiv.innerHTML = `
+        <fieldset>
+          <legend>Product ${productIndex + 1}</legend>
+          <label>Product ID:</label>
+          <input type="text" name="id" placeholder="e.g., SKU123" /><br/><br/>
+          <label>Product Name:</label>
+          <input type="text" name="name" placeholder="e.g., Example Product" /><br/><br/>
+          <label>Category:</label>
+          <input type="text" name="category" placeholder="e.g., Electronics" /><br/><br/>
+          <button type="button" onclick="removeProduct(${productIndex})">Remove Product</button>
+        </fieldset><br/>
+      `;
+      container.appendChild(productDiv);
+    }
+  
+    function removeProduct(index) {
+      const productDiv = document.getElementById('product_' + index);
+      if (productDiv) {
+        productDiv.remove();
+      }
+    }
 
     function sendEvent() {
       var pixelId = document.getElementById('pixelId').value.trim();
