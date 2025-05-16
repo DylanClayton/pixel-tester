@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta property="og:title" content="Facebook T-Shirt">
   <meta property="og:description" content="Unisex Facebook T-shirt, Small">
   <meta property="og:url" content="https://example.org/facebook">
@@ -13,27 +14,56 @@
   <meta property="product:price:currency" content="USD">
   <meta property="product:retailer_item_id" content="facebook_tshirt_001">
   <meta property="product:item_group_id" content="fb_tshirts">
+  
   <title>Meta Pixel Event Tester</title>
-  <script>
-    // Load Meta Pixel script
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-  </script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f7f8;
+      color: #1c1e21;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #1877f2;
+    }
+    label, select, input, button {
+      margin-bottom: 10px;
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #1877f2;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #165eab;
+    }
+    fieldset {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    legend {
+      font-weight: bold;
+    }
+    .product-group {
+      margin-bottom: 15px;
+    }
+  </style>
 </head>
 <body>
+
   <h1>Meta Pixel Event Tester</h1>
+
   <label for="pixelId">Pixel ID:</label>
-  <input type="text" id="pixelId" placeholder="Enter your Pixel ID" /><br/><br/>
+  <input type="text" id="pixelId" placeholder="Enter your Meta Pixel ID">
 
   <label for="eventType">Event Type:</label>
-  <select id="eventType">
-    <option value="PageView">PageView</option>
+  <select id="eventType" onchange="toggleCustomEventFields()">
     <option value="ViewContent">ViewContent</option>
     <option value="Search">Search</option>
     <option value="AddToCart">AddToCart</option>
@@ -51,63 +81,110 @@
     <option value="StartTrial">StartTrial</option>
     <option value="SubmitApplication">SubmitApplication</option>
     <option value="Subscribe">Subscribe</option>
-    <option value="Custom">Custom</option>
-  </select><br/><br/>
+    <option value="Custom">Custom Event</option>
+  </select>
 
-  <div id="customEventNameContainer" style="display:none;">
+  <div id="customEventNameDiv" style="display:none;">
     <label for="customEventName">Custom Event Name:</label>
-    <input type="text" id="customEventName" placeholder="Enter custom event name" /><br/><br/>
+    <input type="text" id="customEventName" placeholder="Enter custom event name">
   </div>
 
-  <label for="metadata">Event Metadata (JSON):</label><br/>
-  <textarea id="metadata" rows="5" cols="50" placeholder='{"currency": "USD", "value": 100}'></textarea><br/><br/>
+  <div id="eventParameters"></div>
 
   <button onclick="sendEvent()">Send Event</button>
 
   <script>
-    document.getElementById('eventType').addEventListener('change', function() {
-      var customEventNameContainer = document.getElementById('customEventNameContainer');
-      if (this.value === 'Custom') {
-        customEventNameContainer.style.display = 'block';
+    const eventParametersMap = {
+      'ViewContent': ['content_ids', 'content_type', 'value', 'currency'],
+      'Search': ['search_string', 'content_type', 'value', 'currency'],
+      'AddToCart': ['content_ids', 'content_type', 'value', 'currency', 'quantity'],
+      'AddToWishlist': ['content_ids', 'content_type', 'value', 'currency'],
+      'InitiateCheckout': ['content_ids', 'content_type', 'value', 'currency'],
+      'AddPaymentInfo': ['content_ids', 'content_type', 'value', 'currency'],
+      'Purchase': ['content_ids', 'content_type', 'value', 'currency', 'transaction_id'],
+      'Lead': ['content_ids', 'content_type', 'value', 'currency'],
+      'CompleteRegistration': ['content_ids', 'content_type', 'value', 'currency'],
+      'Contact': ['content_ids', 'content_type', 'value', 'currency'],
+      'CustomizeProduct': ['content_ids', 'content_type', 'value', 'currency'],
+      'Donate': ['content_ids', 'content_type', 'value', 'currency'],
+      'FindLocation': ['content_ids', 'content_type', 'value', 'currency'],
+      'Schedule': ['content_ids', 'content_type', 'value', 'currency'],
+      'StartTrial': ['content_ids', 'content_type', 'value', 'currency'],
+      'SubmitApplication': ['content_ids', 'content_type', 'value', 'currency'],
+      'Subscribe': ['content_ids', 'content_type', 'value', 'currency'],
+      'Custom': ['custom_param1', 'custom_param2']
+    };
+
+    function toggleCustomEventFields() {
+      const eventType = document.getElementById('eventType').value;
+      const customEventNameDiv = document.getElementById('customEventNameDiv');
+      if (eventType === 'Custom') {
+        customEventNameDiv.style.display = 'block';
       } else {
-        customEventNameContainer.style.display = 'none';
+        customEventNameDiv.style.display = 'none';
       }
-    });
+      updateEventParameters();
+    }
+
+    function updateEventParameters() {
+      const eventType = document.getElementById('eventType').value;
+      const parameters = eventParametersMap[eventType] || [];
+      const eventParametersDiv = document.getElementById('eventParameters');
+      eventParametersDiv.innerHTML = '';
+      parameters.forEach(param => {
+        const div = document.createElement('div');
+        div.classList.add('product-group');
+        div.innerHTML = `
+          <label for="${param}">${param.replace(/_/g, ' ').toUpperCase()}:</label>
+          <input type="text" id="${param}" placeholder="Enter ${param.replace(/_/g, ' ')}">
+        `;
+        eventParametersDiv.appendChild(div);
+      });
+    }
 
     function sendEvent() {
-      var pixelId = document.getElementById('pixelId').value.trim();
-      var eventType = document.getElementById('eventType').value;
-      var customEventName = document.getElementById('customEventName').value.trim();
-      var metadataInput = document.getElementById('metadata').value.trim();
-      var metadata = {};
-
+      const pixelId = document.getElementById('pixelId').value.trim();
       if (!pixelId) {
-        alert('Please enter a Pixel ID.');
+        alert('Please enter your Meta Pixel ID.');
         return;
       }
 
-      try {
-        metadata = metadataInput ? JSON.parse(metadataInput) : {};
-      } catch (e) {
-        alert('Invalid JSON in metadata.');
-        return;
-      }
-
-      // Initialize Meta Pixel
-      fbq('init', pixelId);
-
+      const eventType = document.getElementById('eventType').value;
+      let eventName = eventType;
       if (eventType === 'Custom') {
-        if (!customEventName) {
+        eventName = document.getElementById('customEventName').value.trim();
+        if (!eventName) {
           alert('Please enter a custom event name.');
           return;
         }
-        fbq('trackCustom', customEventName, metadata);
-        alert('Custom event sent: ' + customEventName);
-      } else {
-        fbq('track', eventType, metadata);
-        alert('Standard event sent: ' + eventType);
       }
+
+      const params = {};
+      const parameterFields = eventParametersMap[eventType] || [];
+      parameterFields.forEach(param => {
+        const value = document.getElementById(param).value.trim();
+        if (value) {
+          params[param] = value;
+        }
+      });
+
+      if (Object.keys(params).length === 0) {
+        alert('Please fill in at least one parameter.');
+        return;
+      }
+
+      if (!window.fbq) {
+        alert('Meta Pixel is not loaded.');
+        return;
+      }
+
+      fbq('track', eventName, params);
+      alert(`Event "${eventName}" sent with parameters: ${JSON.stringify(params)}`);
     }
+
+    // Initialize the event parameters for the default event
+    updateEventParameters();
   </script>
+
 </body>
 </html>
