@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta property="og:title" content="Facebook T-Shirt">
+  <meta property="og:description" content="Unisex Facebook T-shirt, Small">
+  <meta property="og:url" content="https://example.org/facebook">
+  <meta property="og:image" content="https://example.org/facebook.jpg">
+  <meta property="product:brand" content="Facebook">
+  <meta property="product:availability" content="in stock">
+  <meta property="product:condition" content="new">
+  <meta property="product:price:amount" content="7.99">
+  <meta property="product:price:currency" content="USD">
+  <meta property="product:retailer_item_id" content="facebook_tshirt_001">
+  <meta property="product:item_group_id" content="fb_tshirts">
+  <title>Meta Pixel Event Tester</title>
+  <script>
+    // Load Meta Pixel script
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+  </script>
+</head>
+<body>
+  <h1>Meta Pixel Event Tester</h1>
+  <label for="pixelId">Pixel ID:</label>
+  <input type="text" id="pixelId" placeholder="Enter your Pixel ID" /><br/><br/>
+
+  <label for="eventType">Event Type:</label>
+  <select id="eventType">
+    <option value="PageView">PageView</option>
+    <option value="ViewContent">ViewContent</option>
+    <option value="Search">Search</option>
+    <option value="AddToCart">AddToCart</option>
+    <option value="AddToWishlist">AddToWishlist</option>
+    <option value="InitiateCheckout">InitiateCheckout</option>
+    <option value="AddPaymentInfo">AddPaymentInfo</option>
+    <option value="Purchase">Purchase</option>
+    <option value="Lead">Lead</option>
+    <option value="CompleteRegistration">CompleteRegistration</option>
+    <option value="Contact">Contact</option>
+    <option value="CustomizeProduct">CustomizeProduct</option>
+    <option value="Donate">Donate</option>
+    <option value="FindLocation">FindLocation</option>
+    <option value="Schedule">Schedule</option>
+    <option value="StartTrial">StartTrial</option>
+    <option value="SubmitApplication">SubmitApplication</option>
+    <option value="Subscribe">Subscribe</option>
+    <option value="Custom">Custom</option>
+  </select><br/><br/>
+
+  <div id="customEventNameContainer" style="display:none;">
+    <label for="customEventName">Custom Event Name:</label>
+    <input type="text" id="customEventName" placeholder="Enter custom event name" /><br/><br/>
+  </div>
+
+  <label for="metadata">Event Metadata (JSON):</label><br/>
+  <textarea id="metadata" rows="5" cols="50" placeholder='{"currency": "USD", "value": 100}'></textarea><br/><br/>
+
+  <button onclick="sendEvent()">Send Event</button>
+
+  <script>
+    document.getElementById('eventType').addEventListener('change', function() {
+      var customEventNameContainer = document.getElementById('customEventNameContainer');
+      if (this.value === 'Custom') {
+        customEventNameContainer.style.display = 'block';
+      } else {
+        customEventNameContainer.style.display = 'none';
+      }
+    });
+
+    function sendEvent() {
+      var pixelId = document.getElementById('pixelId').value.trim();
+      var eventType = document.getElementById('eventType').value;
+      var customEventName = document.getElementById('customEventName').value.trim();
+      var metadataInput = document.getElementById('metadata').value.trim();
+      var metadata = {};
+
+      if (!pixelId) {
+        alert('Please enter a Pixel ID.');
+        return;
+      }
+
+      try {
+        metadata = metadataInput ? JSON.parse(metadataInput) : {};
+      } catch (e) {
+        alert('Invalid JSON in metadata.');
+        return;
+      }
+
+      // Initialize Meta Pixel
+      fbq('init', pixelId);
+
+      if (eventType === 'Custom') {
+        if (!customEventName) {
+          alert('Please enter a custom event name.');
+          return;
+        }
+        fbq('trackCustom', customEventName, metadata);
+        alert('Custom event sent: ' + customEventName);
+      } else {
+        fbq('track', eventType, metadata);
+        alert('Standard event sent: ' + eventType);
+      }
+    }
+  </script>
+</body>
+</html>
