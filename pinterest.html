@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="p:domain_verify" content="9b3a955122917dada4c57f60ea0ad916"/>
+  <title>Pinterest Pixel Event Tester</title>
+  <script>
+    // Load Pinterest Pixel script
+    !function(e){if(!window.pintrk){window.pintrk = function () {
+    window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+      n=window.pintrk;n.queue=[],n.version="3.0";var
+      t=document.createElement("script");t.async=!0,t.src=e;var
+      r=document.getElementsByTagName("script")[0];
+      r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
+  </script>
+  <style>
+    body {
+      font-family: 'VAG Rounded', sans-serif;
+      background-color: #FFFFFF;
+      color: #000000;
+      margin: 0;
+      padding: 20px;
+    }
+  
+    h1 {
+      color: #E60023;
+    }
+  
+    .button {
+      background-color: #E60023;
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  
+    .button:hover {
+      background-color: #c4001d;
+    }
+  
+    .input-field {
+      border: 1px solid #E60023;
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+  
+    .product-fieldset {
+      border: 1px solid #E60023;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+  
+    .product-legend {
+      color: #E60023;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pinterest Pixel Event Tester</h1>
+  <label for="pixelId">Tag ID:</label>
+  <input type="text" id="pixelId" placeholder="Enter your Pinterest Tag ID" /><br/><br/>
+
+  <label for="eventType">Event Type:</label>
+  <select id="eventType">
+    <option value="pagevisit">pagevisit</option>
+    <option value="viewcategory">viewcategory</option>
+    <option value="search">search</option>
+    <option value="addtocart">addtocart</option>
+    <option value="checkout">checkout</option>
+    <option value="watchvideo">watchvideo</option>
+    <option value="signup">signup</option>
+    <option value="lead">lead</option>
+    <option value="custom">custom</option>
+  </select><br/><br/>
+
+  <div id="customEventNameContainer" style="display:none;">
+    <label for="customEventName">Custom Event Name:</label>
+    <input type="text" id="customEventName" placeholder="Enter custom event name" /><br/><br/>
+  </div>
+
+  <h3>Standard Metadata</h3>
+  <label for="currency">Currency:</label>
+  <input type="text" id="currency" placeholder="e.g., USD" /><br/><br/>
+
+  <label for="value">Value:</label>
+  <input type="number" id="value" placeholder="e.g., 100" /><br/><br/>
+
+  <label for="orderId">Order ID:</label>
+  <input type="text" id="orderId" placeholder="e.g., 12345678" /><br/><br/>
+
+  <label for="searchQuery">Search Query:</label>
+  <input type="text" id="searchQuery" placeholder="e.g., red shoes" /><br/><br/>
+
+  <h3>Products Metadata</h3>
+  <div id="productsContainer"></div>
+  <button class="button" onclick="addProduct()">Add Product</button><br/><br/>
+
+  <button class="button" onclick="sendEvent()">Send Event</button>
+
+  <script>
+    document.getElementById('eventType').addEventListener('change', function() {
+      var customEventNameContainer = document.getElementById('customEventNameContainer');
+      if (this.value === 'custom') {
+        customEventNameContainer.style.display = 'block';
+      } else {
+        customEventNameContainer.style.display = 'none';
+      }
+    });
+
+    function addProduct() {
+      const container = document.getElementById('productsContainer');
+      const productIndex = container.children.length;
+      const productDiv = document.createElement('div');
+      productDiv.id = 'product_' + productIndex;
+      productDiv.innerHTML = `
+        <fieldset class="product-fieldset">
+          <legend class="product-legend">Product ${productIndex + 1}</legend>
+          <label>Product ID:</label>
+          <input type="text" name="product_id" placeholder="e.g., SKU123" /><br/><br/>
+          <label>Product Name:</label>
+          <input type="text" name="product_name" placeholder="e.g., Example Product" /><br/><br/>
+          <label>Category:</label>
+          <input type="text" name="product_category" placeholder="e.g., Electronics" /><br/><br/>
+          <label>Price:</label>
+          <input type="number" name="product_price" placeholder="e.g., 49.99" /><br/><br/>
+          <label>Quantity:</label>
+          <input type="number" name="product_quantity" placeholder="e.g., 1" /><br/><br/>
+          <button type="button" class="button" onclick="removeProduct(${productIndex})">Remove Product</button>
+        </fieldset><br/>
+      `;
+      container.appendChild(productDiv);
+    }
+  
+    function removeProduct(index) {
+      const productDiv = document.getElementById('product_' + index);
+      if (productDiv) {
+        productDiv.remove();
+      }
+    }
+
+    function sendEvent() {
+      var pixelId = document.getElementById('pixelId').value.trim();
+      var eventType = document.getElementById('eventType').value;
+      var customEventName = document.getElementById('customEventName').value.trim();
+      var currency = document.getElementById('currency').value.trim();
+      var value = parseFloat(document.getElementById('value').value);
+      var orderId = document.getElementById('orderId').value.trim();
+      var searchQuery = document.getElementById('searchQuery').value.trim();
+
+      if (!pixelId) {
+        alert('Please enter a Pinterest Tag ID.');
+        return;
+      }
+
+      // Initialize Pinterest Tag
+      pintrk('load', pixelId);
+      pintrk('page');
+
+      var eventData = {};
+      if (currency) eventData.currency = currency;
+      if (!isNaN(value)) eventData.value = value;
+      if (orderId) eventData.order_id = orderId;
+      if (searchQuery && eventType === 'search') eventData.search_query = searchQuery;
+
+      // Gather products metadata
+      var line_items = [];
+      var container = document.getElementById('productsContainer');
+      for (var i = 0; i < container.children.length; i++) {
+        var productDiv = container.children[i];
+        var product = {};
+        var inputs = productDiv.querySelectorAll('input');
+        inputs.forEach(function(input) {
+          var name = input.name;
+          var value = input.value.trim();
+          if (value) {
+            if (name === 'product_price' || name === 'product_quantity') {
+              product[name] = parseFloat(value);
+            } else {
+              product[name] = value;
+            }
+          }
+        });
+        if (Object.keys(product).length > 0) {
+          line_items.push(product);
+        }
+      }
+      if (line_items.length > 0) {
+        eventData.line_items = line_items;
+      }
+
+      if (eventType === 'custom') {
+        if (!customEventName) {
+          alert('Please enter a custom event name.');
+          return;
+        }
+        pintrk('track', customEventName, eventData);
+        alert('Event sent: ' + customEventName);
+      } else {
+        pintrk('track', eventType, eventData);
+        alert('Event sent: ' + eventType);
+      }
+    }
+  </script>
+</body>
+</html>
