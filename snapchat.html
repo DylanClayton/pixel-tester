@@ -1,22 +1,248 @@
-<html>
-  <head>
-    <!-- snapchat pixel -->
-    <script type='text/javascript'>
-      (function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
-      {a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
-      a.queue=[];var s='script';r=t.createElement(s);r.async=!0;
-      r.src=n;var u=t.getElementsByTagName(s)[0];
-      u.parentNode.insertBefore(r,u);})(window,document,
-      'https://sc-static.net/scevent.min.js');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Snapchat Pixel Event Tester</title>
+  <script type='text/javascript'>
+    // Load Snapchat Pixel script
+    (function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
+    {a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
+    a.queue=[];var s='script';r=t.createElement(s);r.async=!0;
+    r.src=n;var u=t.getElementsByTagName(s)[0];
+    u.parentNode.insertBefore(r,u);})(window,document,
+    'https://sc-static.net/scevent.min.js');
+  </script>
+  <style>
+    body {
+      font-family: 'VAG Rounded', sans-serif;
+      background-color: #FFFFFF;
+      color: #000000;
+      margin: 0;
+      padding: 20px;
+    }
+  
+    .button {
+      background-color: #FFFC00;
+      color: #000000;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+  
+    .button:hover {
+      background-color: #E6E300;
+    }
+  
+    .input-field {
+      border: 1px solid #FFFC00;
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+  
+    .product-fieldset {
+      border: 1px solid #FFFC00;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+  
+    .product-legend {
+      color: #FFFC00;
+      font-weight: bold;
+    }
+
+    select, input {
+      padding: 8px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    fieldset {
+      border: 1px solid #FFFC00;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+    }
+
+    legend {
+      color: #000000;
+      font-weight: bold;
+      padding: 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Snapchat Pixel Event Tester</h1>
+  <label for="pixelId">Pixel ID:</label>
+  <input type="text" id="pixelId" placeholder="Enter your Snapchat Pixel ID" /><br/><br/>
+
+  <label for="userEmail">User Email (optional):</label>
+  <input type="email" id="userEmail" placeholder="user@example.com" /><br/><br/>
+
+  <label for="userPhone">User Phone (optional):</label>
+  <input type="text" id="userPhone" placeholder="+1234567890" /><br/><br/>
+
+  <label for="eventType">Event Type:</label>
+  <select id="eventType">
+    <option value="PAGE_VIEW">PAGE_VIEW</option>
+    <option value="VIEW_CONTENT">VIEW_CONTENT</option>
+    <option value="SEARCH">SEARCH</option>
+    <option value="ADD_CART">ADD_CART</option>
+    <option value="ADD_TO_WISHLIST">ADD_TO_WISHLIST</option>
+    <option value="START_CHECKOUT">START_CHECKOUT</option>
+    <option value="ADD_BILLING">ADD_BILLING</option>
+    <option value="PURCHASE">PURCHASE</option>
+    <option value="SIGN_UP">SIGN_UP</option>
+    <option value="COMPLETE_TUTORIAL">COMPLETE_TUTORIAL</option>
+    <option value="SUBSCRIBE">SUBSCRIBE</option>
+    <option value="AD_CLICK">AD_CLICK</option>
+    <option value="AD_VIEW">AD_VIEW</option>
+    <option value="CUSTOM">CUSTOM</option>
+  </select><br/><br/>
+
+  <div id="customEventNameContainer" style="display:none;">
+    <label for="customEventName">Custom Event Name:</label>
+    <input type="text" id="customEventName" placeholder="Enter custom event name" /><br/><br/>
+  </div>
+
+  <h3>Event Data</h3>
+  <label for="currency">Currency:</label>
+  <input type="text" id="currency" placeholder="e.g., USD" /><br/><br/>
+
+  <label for="price">Price:</label>
+  <input type="number" id="price" placeholder="e.g., 100" step="0.01" /><br/><br/>
+
+  <label for="transactionId">Transaction ID:</label>
+  <input type="text" id="transactionId" placeholder="e.g., 12345678" /><br/><br/>
+
+  <label for="searchString">Search String:</label>
+  <input type="text" id="searchString" placeholder="e.g., blue shoes" /><br/><br/>
+
+  <label for="description">Description:</label>
+  <input type="text" id="description" placeholder="e.g., Product Description" /><br/><br/>
+
+  <h3>Item Details</h3>
+  <div id="itemsContainer"></div>
+  <button class="button" onclick="addItem()">Add Item</button><br/><br/>
+
+  <button class="button" onclick="sendEvent()">Send Event</button>
+
+  <script>
+    document.getElementById('eventType').addEventListener('change', function() {
+      var customEventNameContainer = document.getElementById('customEventNameContainer');
+      if (this.value === 'CUSTOM') {
+        customEventNameContainer.style.display = 'block';
+      } else {
+        customEventNameContainer.style.display = 'none';
+      }
+    });
+
+    function addItem() {
+      const container = document.getElementById('itemsContainer');
+      const itemIndex = container.children.length;
+      const itemDiv = document.createElement('div');
+      itemDiv.id = 'item_' + itemIndex;
+      itemDiv.innerHTML = `
+        <fieldset>
+          <legend>Item ${itemIndex + 1}</legend>
+          <label>Item ID:</label>
+          <input type="text" name="item_id" placeholder="e.g., SKU123" /><br/><br/>
+          <label>Item Name:</label>
+          <input type="text" name="item_name" placeholder="e.g., Example Product" /><br/><br/>
+          <label>Category:</label>
+          <input type="text" name="category" placeholder="e.g., Electronics" /><br/><br/>
+          <label>Price:</label>
+          <input type="number" name="price" placeholder="e.g., 49.99" step="0.01" /><br/><br/>
+          <label>Quantity:</label>
+          <input type="number" name="quantity" placeholder="e.g., 1" /><br/><br/>
+          <button type="button" class="button" onclick="removeItem(${itemIndex})">Remove Item</button>
+        </fieldset><br/>
+      `;
+      container.appendChild(itemDiv);
+    }
+  
+    function removeItem(index) {
+      const itemDiv = document.getElementById('item_' + index);
+      if (itemDiv) {
+        itemDiv.remove();
+      }
+    }
+
+    function sendEvent() {
+      var pixelId = document.getElementById('pixelId').value.trim();
+      var userEmail = document.getElementById('userEmail').value.trim();
+      var userPhone = document.getElementById('userPhone').value.trim();
+      var eventType = document.getElementById('eventType').value;
+      var customEventName = document.getElementById('customEventName').value.trim();
+      var currency = document.getElementById('currency').value.trim();
+      var price = parseFloat(document.getElementById('price').value);
+      var transactionId = document.getElementById('transactionId').value.trim();
+      var searchString = document.getElementById('searchString').value.trim();
+      var description = document.getElementById('description').value.trim();
+
+      if (!pixelId) {
+        alert('Please enter a Snapchat Pixel ID.');
+        return;
+      }
+
+      // Initialize Snapchat Pixel
+      var initOptions = {};
+      if (userEmail) initOptions.user_email = userEmail;
+      if (userPhone) initOptions.phone_number = userPhone;
       
-      snaptr('init', '84aaa325-9ff7-4c64-b2a8-42f7f972a529', {
-      'user_email': 'dylan.clayton@reddit.com'
-      });
-      snaptr('track', 'PAGE_VIEW');
-    </script>
-    <!-- End Snap Pixel Code -->
-  </head>
-  <body>
-    Snapchat
-  </body>
+      snaptr('init', pixelId, initOptions);
+
+      // Build event data
+      var eventData = {};
+      if (currency) eventData.currency = currency;
+      if (!isNaN(price)) eventData.price = price;
+      if (transactionId) eventData.transaction_id = transactionId;
+      if (searchString && eventType === 'SEARCH') eventData.search_string = searchString;
+      if (description) eventData.description = description;
+
+      // Gather items data
+      var items = [];
+      var container = document.getElementById('itemsContainer');
+      for (var i = 0; i < container.children.length; i++) {
+        var itemDiv = container.children[i];
+        var item = {};
+        var inputs = itemDiv.querySelectorAll('input');
+        inputs.forEach(function(input) {
+          var name = input.name;
+          var value = input.value.trim();
+          if (value) {
+            if (name === 'price' || name === 'quantity') {
+              item[name] = parseFloat(value);
+            } else {
+              item[name] = value;
+            }
+          }
+        });
+        if (Object.keys(item).length > 0) {
+          items.push(item);
+        }
+      }
+      if (items.length > 0) {
+        eventData.item_ids = items.map(item => item.item_id).filter(id => id);
+        eventData.items = items;
+      }
+
+      // Send event
+      if (eventType === 'CUSTOM') {
+        if (!customEventName) {
+          alert('Please enter a custom event name.');
+          return;
+        }
+        snaptr('track', customEventName, eventData);
+        alert('Event sent: ' + customEventName);
+      } else {
+        snaptr('track', eventType, eventData);
+        alert('Event sent: ' + eventType);
+      }
+    }
+  </script>
+</body>
 </html>
