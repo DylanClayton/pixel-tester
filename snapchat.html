@@ -76,8 +76,6 @@
 </head>
 <body>
   <h1>Snapchat Pixel Event Tester</h1>
-  <label for="pixelId">Pixel ID:</label>
-  <input type="text" id="pixelId" placeholder="Enter your Snapchat Pixel ID" /><br/><br/>
 
   <label for="userEmail">User Email (optional):</label>
   <input type="email" id="userEmail" placeholder="user@example.com" /><br/><br/>
@@ -172,7 +170,6 @@
     }
 
     function sendEvent() {
-      var pixelId = document.getElementById('pixelId').value.trim();
       var userEmail = document.getElementById('userEmail').value.trim();
       var userPhone = document.getElementById('userPhone').value.trim();
       var eventType = document.getElementById('eventType').value;
@@ -183,10 +180,8 @@
       var searchString = document.getElementById('searchString').value.trim();
       var description = document.getElementById('description').value.trim();
 
-      if (!pixelId) {
-        alert('Please enter a Snapchat Pixel ID.');
-        return;
-      }
+      // Using hardcoded Pixel ID
+      var pixelId = '0500fca3-5e32-425c-8e54-3ffc192af551';
 
       // Initialize Snapchat Pixel
       var initOptions = {};
